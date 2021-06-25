@@ -28,6 +28,7 @@ $pentDate = "$pentDay/$pentMonth";
 $ferier = [$pentDate=>'Pentecôte', $ascensionDate=>'Ascension', $easterDay =>'Pâques', '1/01'=>'Jour de l\'An', '1/05'=>'Fête du Travail','8/05'=>'Victoire des Alliés', '14/07'=>'Fête nationale','15/08'=>'Assomption','1/11'=>'Toussaint', '11/11'=>'Armistice', '25/12'=>'Noël'];
 $ferierVariable = [$easterDay=>'Pâques', $ascensionDate=>'Ascension', $pentDate=>'Pentecôte'];
 function showDays($offset, $target){
+
     global $inputMonth, $ferier;
     $lengthMonth = date("t", $target);
 
@@ -37,14 +38,16 @@ function showDays($offset, $target){
             $classNot = "";
             $info = '';
             $start =  $i - $offset + 1 ;
-            if ($start <= 0) {
+            if ($start < 1) {
                 $start = '';
                 $classNot = "not";
             } elseif ($start > $lengthMonth) {
                 $start = '';
                 $classNot = "not";
             }
+            var_dump("$start/$inputMonth");
             if (array_key_exists("$start/$inputMonth", $ferier)) {
+                
                 $info = $ferier["$start/$inputMonth"];
                 $class = "ferier";
             }
@@ -100,11 +103,18 @@ function isSelectYear($params){
 function arrow($params){
     if (isset($_GET['month'])) {
         if($params == 'left'){
-            return $_GET['month'] - 1;
+            $result = $_GET['month'] - 1;
+            if($result < 1 ){
+                $result = 12;
+            }
+            return $result;
         } elseif ($params == 'right') {
-            return $_GET['month'] + 1;
+            $result = $_GET['month'] + 1;
+            if ($result > 12){
+                $result = 1;
+            }
+            return $result;
         }
-        
     } else {
         if($params == 'left'){
             return strftime('%m') - 1;
@@ -112,6 +122,10 @@ function arrow($params){
             return strftime('%m') + 1;
         } 
     }
+}
+
+function arrowMonth(){
+
 }
 
 if(isset($_GET['month']) && !isset($_GET['year'])){
