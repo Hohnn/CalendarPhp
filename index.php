@@ -12,16 +12,30 @@ if (isset($_GET['month']) && isset($_GET['year'])) {
     $firstDay = date("N", mktime(0,0,0,6,1,2021));
     $target = time();
 }
-//paque + 39 
-$ferier = ['1/01'=>'Jour de l\'An', '13/04'=>'Pâques', '1/05'=>'Fête du Travail','08/05'=>'Victoire des Alliés', '21/05'=>'Ascension',  '1/06'=>'Pentecôte', '14/07'=>'Fête nationale','15/08'=>'Assomption','1/11'=>'Toussaint', '11/11'=>'Armistice', '25/12'=>'Noël'];
+$easterDate = easter_date($_GET['year'] ?? strftime('%Y')) + 86400 * 2;
+$easterToAsc = easter_date($_GET['year'] ?? strftime('%Y')) + 86400 * 40;
+$easterToPent = easter_date($_GET['year'] ?? strftime('%Y')) + 86400 * 51;
+$easterDay = intval(strftime('%d', $easterDate)) ;
+$ascDay = intval(strftime('%d', $easterToAsc));
+$pentDay = intval(strftime('%d', $easterToPent));
+$easterMonth = strftime('%m', $easterDate);
+$ascMonth = strftime('%m', $easterToAsc);
+$pentMonth = strftime('%m', $easterToPent);
+$easterDay = "$easterDay/$easterMonth";
+$ascensionDate = "$ascDay/$ascMonth";
+$pentDate = "$pentDay/$pentMonth";
 
+$ferier = [$pentDate=>'Pentecôte', $ascensionDate=>'Ascension', $easterDay =>'Pâques', '1/01'=>'Jour de l\'An', '1/05'=>'Fête du Travail','8/05'=>'Victoire des Alliés', '14/07'=>'Fête nationale','15/08'=>'Assomption','1/11'=>'Toussaint', '11/11'=>'Armistice', '25/12'=>'Noël'];
+$ferierVariable = [$easterDay=>'Pâques', $ascensionDate=>'Ascension', $pentDate=>'Pentecôte'];
 function showDays($offset, $target){
     global $inputMonth, $ferier;
     $lengthMonth = date("t", $target);
-    if ($offset > 5 ) {
+
+    if ($offset > 5 && $lengthMonth >= 29) {
         for ($i=1; $i <= 42; $i++) {
             $class ='';
             $classNot = "";
+            $info = '';
             $start =  $i - $offset + 1 ;
             if ($start <= 0) {
                 $start = '';
@@ -30,13 +44,12 @@ function showDays($offset, $target){
                 $start = '';
                 $classNot = "not";
             }
-            $info = '';
             if (array_key_exists("$start/$inputMonth", $ferier)) {
                 $info = $ferier["$start/$inputMonth"];
                 $class = "ferier";
             }
             ?>
-                <div class="box bg-dark<?=  $class ?> <?=  $classNot ?>">
+                <div class="box <?=  $class ?> <?=  $classNot ?>">
                     <div class="number "><?= $start ?></div>
                     <div class="info"><?= $info ?></div>
                 </div>
@@ -47,6 +60,7 @@ function showDays($offset, $target){
     for ($i=1; $i <= 35; $i++) {
         $class ='';
         $classNot = "";
+        $info = '';
         $start =  $i - $offset + 1 ;
         if ($start <= 0) {
             $start = '';
@@ -55,13 +69,12 @@ function showDays($offset, $target){
             $start = '';
             $classNot = "not";
         }
-        $info = '';
         if (array_key_exists("$start/$inputMonth", $ferier)) {
             $info = $ferier["$start/$inputMonth"];
             $class = "ferier";
         }
         ?>
-            <div class="box bg-dark<?=  $class ?> <?=  $classNot ?>">
+            <div class="box <?=  $class ?> <?=  $classNot ?>">
                 <div class="number "><?= $start ?></div>
                 <div class="info"><?= $info ?></div>
             </div>
@@ -83,6 +96,35 @@ function isSelectYear($params){
         }
     }
 }
+
+function arrow($params){
+    if (isset($_GET['month'])) {
+        if($params == 'left'){
+            return $_GET['month'] - 1;
+        } elseif ($params == 'right') {
+            return $_GET['month'] + 1;
+        }
+        
+    } else {
+        if($params == 'left'){
+            return strftime('%m') - 1;
+        } elseif ($params == 'right') {
+            return strftime('%m') + 1;
+        } 
+    }
+}
+
+if(isset($_GET['month']) && !isset($_GET['year'])){
+    $month = $_GET['month'];
+    $year = strftime('%Y');
+    header("location: index.php?month=$month&year=$year");
+}
+if(!isset($_GET['month']) && isset($_GET['year'])){
+    $month = strftime('%m');
+    $year = $_GET['year'];
+    header("location: index.php?month=$month&year=$year");
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -92,10 +134,12 @@ function isSelectYear($params){
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
-    <link rel="stylesheet" href="./style.css">    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./style.css">  
+    <link rel="stylesheet" href="./print.css" media="print">
     <title>Calendrier</title>
 </head>
-<body class="accueil bg-dark">
+<body class="accueil">
     <h1 class="mb-1 mt-5">CALENDRIER GENERATOR</h1>
     <h5 class="my-4">Générer votre calendrier</h5>
     <div class="myForm p-3">
@@ -135,12 +179,19 @@ function isSelectYear($params){
                 <option <?= isSelectYear(2025) ?> value="2025">2025</option>
             </select>
         </div>
-        <button class="btn btn-primary" type="submit" id="btn">Afficher</button>
+        <button class="btn btn-primary mb-4" type="submit" id="btn">Afficher</button>
         </form>
     </div>
 
     <div class="calendar">
-        <h2><?= $dateChose ?></h2>
+        
+        <h2><?= $dateChose ?>
+        <div class="arrows">
+            <a href="index.php?month=<?= arrow('left') ?>&year=<?= !empty($_GET['year']) ? $_GET['year'] : strftime('%Y') ?>" class="arrowLeft"><i class="bi bi-chevron-left"></i></a>
+            <a href="index.php?month=<?= arrow('right') ?>&year=<?= !empty($_GET['year']) ? $_GET['year'] : strftime('%Y') ?>" class="arrowRight"><i class="bi bi-chevron-right"></i></a>
+        </div>
+        </h2>
+        
         <div class="days">
             <div class="jour">Lundi</div>
             <div class="jour">Mardi</div>
@@ -154,5 +205,7 @@ function isSelectYear($params){
             <?= showDays($firstDay, $target) ?>
         </div>
     </div>
+    <input class="mt-4" type="button" value="Imprimer" onClick="window.print()">
+
 </body>
 </html>

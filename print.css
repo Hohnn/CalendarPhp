@@ -2,7 +2,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 2vw;
 }
 
 h1 {
@@ -36,7 +35,6 @@ h2 {
     margin: 0 0 1px 0;
     padding: 0.5rem 1rem;
     position: relative;
-    font-size: 2vw;
 }
 
 h2::first-letter {
@@ -50,7 +48,7 @@ h2::first-letter {
 .jour {
     width: 100%;
     text-align: center;
-    font-size: 2vw;
+    font-size: calc(0.5rem + 1vw);
     border: 1px transparent solid;
     margin: 1px;
     background-color: rgba(32, 32, 32, 0.315);
@@ -75,8 +73,8 @@ h2::first-letter {
 }
 
 .number {
-    font-size: 2vw;
-    margin: 10% 10%;
+    font-size: 1.5em;
+    margin: 0.5rem 0.8rem;
 }
 
 .info {
@@ -84,7 +82,6 @@ h2::first-letter {
     bottom: 0;
     right: 0;
     padding: 0.5rem 0.8rem;
-    font-size: 1vw;
 }
 
 .ferier {
@@ -95,6 +92,7 @@ h2::first-letter {
 
 body {
     padding-bottom: 70px;
+
 }
 
 .accueil .myForm {
@@ -116,7 +114,7 @@ body {
     align-items: center;
     background-position: center;
     color: white;
-    background-color: #212529;
+    background-color: unset !important;
 }
 
 .accueil h1 {
@@ -181,11 +179,12 @@ button:hover {
     transform: translate(-50%, -50%);
     display: flex;
     justify-content: space-between;
+    display: none;
 }
 
 .arrowLeft i, .arrowRight i {
     color: white !important;
-    font-size: 2vw;
+    font-size: 2rem;
 }
 
 .box:nth-child(7n-1) {
@@ -195,3 +194,6 @@ button:hover {
     background-color: rgba(0, 0, 0, 0.377);
 }
 
+body>*:not(.calendar){
+    display: none;
+}
